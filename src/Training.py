@@ -56,10 +56,15 @@ for strideX in range(0, numRealSamples ):
 
 
 randomGenerator = WhiteNoiseModel();
+randomGenerator2 = BrownianModel();
 randomGenerator.fit(ts);
+randomGenerator2.fit(ts);
 
 for strideX in range(numRealSamples, numRealSamples+numFakeSamples ):
-    x[strideX] = randomGenerator.generate(windowSize)
+    if strideX % 2 == 0:
+        x[strideX] = randomGenerator.generate(windowSize)
+    else:
+        x[strideX] = randomGenerator2.generate(windowSize)
     y[strideX][1] = 1; 
 
 
@@ -72,7 +77,7 @@ print(x.shape);
 
 
 hist = descrModel.fit(x, y,  
-              batch_size=256, epochs=10, verbose=1)
+              batch_size=256, epochs=50, verbose=1)
 
 
 yPrime = descrModel.predict(x);
