@@ -63,7 +63,7 @@ class Garch11Model:
         for i in range(0,10000):
             self.gr.next();
             
-        for i in range(0,numPoints):
+        for i in range(0,numPoints-1):
             testRandomData.append(self.gr.next());
                 
         return createPriceSeriesFromReturns(testRandomData, self.initialValue);
@@ -76,15 +76,11 @@ def testGarchGenerator():
     
     ts = np.array([x for y,x in tsList]);    
     
-    garchModel = Garch11Model();
-    garchModel.fit(ts);
-    
-    #Warm up generator
-    
-    
-    
+    randomGenerator = Garch11Model();
+    randomGenerator.fit(ts);
+        
     plt.figure("Random from trained garch");
-    plt.plot(garchModel.generate(8000));
+    plt.plot(randomGenerator.generate(8000));
     plt.figure("Original training set");
     plt.plot(ts);
     plt.show();

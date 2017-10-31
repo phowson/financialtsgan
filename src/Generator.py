@@ -7,13 +7,12 @@ Created on 30 Oct 2017
 from keras.utils import np_utils
 import keras.models as models
 from keras.layers import Input,merge
-from keras.layers.core import Reshape,Dense,Dropout,Activation,Flatten,MaxoutDense
+from keras.layers.core import Reshape,Dense,Dropout,Activation,Flatten
 from keras.layers.advanced_activations import LeakyReLU
 from keras.activations import *
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.noise import GaussianNoise
 from keras.layers.convolutional import Convolution1D, MaxPooling1D, ZeroPadding1D, UpSampling1D,Convolution1D
-from keras.layers.recurrent import LSTM
 from keras.regularizers import *
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import *
