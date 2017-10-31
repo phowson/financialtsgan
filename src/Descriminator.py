@@ -12,7 +12,7 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.activations import *
 from keras.layers.wrappers import TimeDistributed
 from keras.layers.noise import GaussianNoise
-from keras.layers.convolutional import Convolution1D, MaxPooling1D, ZeroPadding1D, UpSampling1D,Convolution1D
+from keras.layers.convolutional import Conv1D, MaxPooling1D, ZeroPadding1D, UpSampling1D,Convolution1D
 from keras.regularizers import *
 from keras.layers.normalization import *
 from keras.optimizers import *
@@ -30,16 +30,20 @@ class DescriminatorFactory:
     
     def create(self):
         d_input = Input(shape=self.inputShape)
-        H = Activation('tanh')(d_input)
-        H = Convolution1D(128,  kernel_size=5, strides=2, dilation_rate=1,  border_mode = 'same', activation='relu')(H)       
-        H = LeakyReLU(0.2)(H)        
+        #H = Activation('tanh')(d_input)
+        H = d_input
+        H = Conv1D(128,  kernel_size=5, strides=2, dilation_rate=1,  border_mode = 'same', activation='relu')(H)       
+        H = LeakyReLU(0.1)(H)        
         H = Dropout(self.dropout_rate)(H)
-        H = Convolution1D(32,  kernel_size=5, strides=2, dilation_rate=1, border_mode = 'same', activation='relu')(H)
-        H = LeakyReLU(0.2)(H)
-        H = Dropout(self.dropout_rate)(H)
+        H = Conv1D(32,  kernel_size=3, strides=2, dilation_rate=1, border_mode = 'same', activation='relu')(H)
+        H = LeakyReLU(0.1)(H)
+        H = Dropout(self.dropout_rate)(H)        
+#         H = Conv1D(1,  kernel_size=1, strides=1, dilation_rate=1, border_mode = 'same', activation='relu')(H)
+#         H = LeakyReLU(0.1)(H)        
+#         H = Dropout(self.dropout_rate)(H)
         H = Flatten()(H)
         H = Dense(256)(H)
-        H = LeakyReLU(0.2)(H)
+        H = LeakyReLU(0.1)(H)
         H = Dropout(self.dropout_rate)(H)
         d_V = Dense(2,activation='softmax')(H)
         discriminator = Model(d_input,d_V)

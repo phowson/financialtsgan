@@ -8,6 +8,7 @@ import Descriminator
 import Generator
 import numpy as np;
 from  BrownianGenerator import BrownianModel 
+from WhiteNoiseGenerator import WhiteNoiseModel
 from CsvDataImport import loadCsv;
 from keras.optimizers import Adam
 
@@ -54,7 +55,7 @@ for strideX in range(0, numRealSamples ):
 
 
 
-randomGenerator = BrownianModel();
+randomGenerator = WhiteNoiseModel();
 randomGenerator.fit(ts);
 
 for strideX in range(numRealSamples, numRealSamples+numFakeSamples ):
@@ -78,7 +79,10 @@ yPrime = descrModel.predict(x);
 
 
 
-for strideX in range(0, numRealSamples+numFakeSamples ):
-    print(yPrime[strideX])
+with open("results.txt","w") as file: 
+
+    for strideX in range(0, numRealSamples+numFakeSamples ):
+        file.write(str(yPrime[strideX]))
+        file.write('\n');
 
 
