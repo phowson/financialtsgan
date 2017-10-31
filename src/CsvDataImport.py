@@ -42,7 +42,7 @@ def loadCsv(fileName):
         
     
     
-    return timeSeries;
+    return sorted(timeSeries);
 
 
 

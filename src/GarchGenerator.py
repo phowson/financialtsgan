@@ -4,8 +4,11 @@ import numpy as np;
 import math;
 import matplotlib.pyplot as plt
 
+from Helpers import createPriceSeriesFromReturns;
 
-class GarchRandomGenerator:
+
+
+class Garch11RandomVariable:
     
     def __init__(self, alpha, beta, omega, mu):
         self.et = 0;
@@ -29,38 +32,59 @@ class GarchRandomGenerator:
         return rt;
         
         
+class Garch11Model:
+    
+    def __init__(self):
+        self.gr=None;
+        self.initialValue = 0;
+    
+    def fit(self, ts):
+        retG = [];
+        self.initialValue = ts[0];
+        lx=ts[0];
+        for x in ts[1:]:
+            retG.append(100 * (x / lx));
+            lx = x;            
+        retG= np.array(retG);
+        garch11 = arch_model(retG, p=1, q=1)
+        res = garch11.fit()
+        
+        self.gr = Garch11RandomVariable(alpha = res.params['alpha[1]'], 
+                                  beta= res.params['beta[1]'], 
+                                  omega = res.params['omega'], 
+                                  mu = res.params['mu']);
+
+
+        
+    def generate(self, numPoints=1000):
+        testRandomData = []
+        
+        # Re-randomise garch
+        for i in range(0,10000):
+            self.gr.next();
+            
+        for i in range(0,numPoints):
+            testRandomData.append(self.gr.next());
+                
+        return createPriceSeriesFromReturns(testRandomData, self.initialValue);
+        
+
+
+def testGarchGenerator():
+    
+    tsList= loadCsv('../data/GBPUSD.csv');
+    
+    ts = np.array([x for y,x in tsList]);    
+    
+    garchModel = Garch11Model();
+    garchModel.fit(ts);
+    
+    #Warm up generator
     
     
-
-tsList= loadCsv('../data/GBPUSD.csv');
-
-ts = np.array([x for y,x in tsList]);    
-
-
-retG = [];
-lx=ts[0];
-for x in ts[1:]:
-    retG.append(100 * (x / lx));
-    lx = x;
     
-retG= np.array(retG);
-
-print(retG)
-garch11 = arch_model(retG, p=1, q=1)
-res = garch11.fit()
-print(res.summary());
-
-# print(res.params["alpha[1]"])
-gr = GarchRandomGenerator(alpha = res.params['alpha[1]'], 
-                          beta= res.params['beta[1]'], 
-                          omega = res.params['omega'], 
-                          mu = res.params['mu']);
-
-testRandomData = []
-for i in range(0,4000):
-    testRandomData.append(gr.next());
-
-plt.plot(np.array(testRandomData));
-plt.figure();
-plt.plot(retG);
-plt.show();
+    plt.figure("Random from trained garch");
+    plt.plot(garchModel.generate(8000));
+    plt.figure("Original training set");
+    plt.plot(ts);
+    plt.show();
