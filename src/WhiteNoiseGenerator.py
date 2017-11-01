@@ -16,12 +16,20 @@ class WhiteNoiseModel:
         x= np.array(ts);
         self.mean = np.mean(x);
         self.sd = math.sqrt(np.var(x)) 
-       
+        self.minTickSize= 99e999;
+        lx=ts[0];        
+        for x in ts[1:]:
+            sz = abs(lx - x);
+            if sz<self.minTickSize and sz>0:
+                self.minTickSize = sz;
+            lx = x;             
     
     def generate(self, numPoints=1000):
         testRandomData = []
         for i in range(0,numPoints):
-            testRandomData.append(self.mean + self.sd * np.random.normal());
+            p = self.mean + self.sd * np.random.normal();
+            p = round(p/ self.minTickSize) * self.minTickSize;
+            testRandomData.append(p);
                 
         return np.array(testRandomData);
             

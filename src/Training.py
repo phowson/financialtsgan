@@ -12,8 +12,23 @@ from WhiteNoiseGenerator import WhiteNoiseModel
 from GarchGenerator import Garch11Model
 from CsvDataImport import loadCsv;
 from keras.optimizers import Adam
+import keras;
 
 
+class LossHistory(keras.callbacks.Callback):
+    
+    def __init__(self, model):
+        self.model = model;
+        self.minLoss = 9999e999;
+    
+
+    def on_epoch_end(self, batch, logs={}):
+        l = logs.get('loss');        
+        if (l<self.minLoss):
+            print("Saving new best model");
+            self.model.save("model.keras")
+            self.minLoss = l;        
+        
 
 def rolling_window(arr, window):
     """Very basic multi dimensional rolling window. window should be the shape of
@@ -77,8 +92,9 @@ print(x.shape);
 
 
 
-hist = descrModel.fit(x, y,  
-              batch_size=256, epochs=500, verbose=1)
+history = LossHistory(descrModel);
+descrModel.fit(x, y,  
+              batch_size=256, epochs=500, verbose=1, callbacks=[history])
 
 
 yPrime = descrModel.predict(x);

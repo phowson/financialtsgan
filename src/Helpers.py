@@ -1,12 +1,12 @@
 import numpy as np;
 
-def createPriceSeriesFromReturns(l, initial):
+def createPriceSeriesFromReturns(l, initial, ticksize):
     
     p = initial;
     out = [ p ];
     for x in l:
-        p = p * (x /100.);
-        
+        p = p * (x /100.);        
+        p = round(p/ ticksize) * ticksize;
         out.append(p)
     
     return np.array(out);

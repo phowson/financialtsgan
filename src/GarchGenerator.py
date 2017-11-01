@@ -22,6 +22,10 @@ class Garch11RandomVariable:
     def standardNormalRandom(self):
         return np.random.normal();
         
+    def reset(self):
+        self.sigmaSquaredT = self.omega;
+        self.et = 0;
+        
     def next(self):
         
         newSigmaSquaredT = self.omega + self.alpha * self.et* self.et + self.beta*self.sigmaSquaredT;
@@ -41,9 +45,17 @@ class Garch11Model:
         retG = [];
         self.ts = ts;
         lx=ts[0];
+        self.minTickSize= 99e999;
+        
         for x in ts[1:]:
             retG.append(100 * (x / lx));
+            sz = abs(lx - x);
+            if sz<self.minTickSize and sz>0:
+                self.minTickSize = sz;
             lx = x;            
+            
+            
+            
         retG= np.array(retG);
         garch11 = arch_model(retG, p=1, q=1)
         res = garch11.fit()
@@ -59,13 +71,14 @@ class Garch11Model:
         testRandomData = []
         
         # Re-randomise garch
+        self.gr.reset()
         for i in range(0,1000):
             self.gr.next();
             
         for i in range(0,numPoints-1):
             testRandomData.append(self.gr.next());
                 
-        return createPriceSeriesFromReturns(testRandomData, self.ts[int(np.random.uniform() * len(self.ts))]);
+        return createPriceSeriesFromReturns(testRandomData, self.ts[int(np.random.uniform() * len(self.ts))], self.minTickSize);
         
 
 

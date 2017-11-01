@@ -18,8 +18,12 @@ class BrownianModel:
         retG = [];
         self.ts = ts;
         lx=ts[0];
+        self.minTickSize= 99e999;        
         for x in ts[1:]:
             retG.append(math.log(x / lx));
+            sz = abs(lx - x);
+            if sz<self.minTickSize and sz>0:
+                self.minTickSize = sz;
             lx = x;            
         retG= np.array(retG);
         self.mean = np.mean(retG);
@@ -31,7 +35,7 @@ class BrownianModel:
         for i in range(0,numPoints-1):
             testRandomData.append(100*math.exp(self.mean + self.sd * np.random.normal()));
                 
-        return createPriceSeriesFromReturns(testRandomData, self.ts[int(np.random.uniform() * len(self.ts))]);
+        return createPriceSeriesFromReturns(testRandomData, self.ts[int(np.random.uniform() * len(self.ts))], self.minTickSize);
             
 
             
