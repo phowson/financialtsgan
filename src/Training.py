@@ -9,6 +9,7 @@ import Generator
 import numpy as np;
 from  BrownianGenerator import BrownianModel 
 from WhiteNoiseGenerator import WhiteNoiseModel
+from GarchGenerator import Garch11Model
 from CsvDataImport import loadCsv;
 from keras.optimizers import Adam
 
@@ -54,17 +55,17 @@ for strideX in range(0, numRealSamples ):
 
 
 
+randomGenerators = [];
+randomGenerators.append(WhiteNoiseModel());
+randomGenerators.append(BrownianModel());
+randomGenerators.append(Garch11Model());
 
-randomGenerator = WhiteNoiseModel();
-randomGenerator2 = BrownianModel();
-randomGenerator.fit(ts);
-randomGenerator2.fit(ts);
+for g in randomGenerators:
+    g.fit(ts);
 
+print("Generating synthetic series")
 for strideX in range(numRealSamples, numRealSamples+numFakeSamples ):
-    if strideX % 2 == 0:
-        x[strideX] = randomGenerator.generate(windowSize)
-    else:
-        x[strideX] = randomGenerator2.generate(windowSize)
+    x[strideX] = randomGenerators[strideX % len(randomGenerators)].generate(windowSize)
     y[strideX][1] = 1; 
 
 
@@ -77,7 +78,7 @@ print(x.shape);
 
 
 hist = descrModel.fit(x, y,  
-              batch_size=256, epochs=50, verbose=1)
+              batch_size=256, epochs=500, verbose=1)
 
 
 yPrime = descrModel.predict(x);

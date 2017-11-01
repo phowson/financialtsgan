@@ -17,7 +17,6 @@ class Garch11RandomVariable:
         self.omega = omega;
         self.mu = mu;
         
-        
         self.sigmaSquaredT = omega;
         
     def standardNormalRandom(self):
@@ -36,11 +35,11 @@ class Garch11Model:
     
     def __init__(self):
         self.gr=None;
-        self.initialValue = 0;
+        self.ts = None;
     
     def fit(self, ts):
         retG = [];
-        self.initialValue = ts[0];
+        self.ts = ts;
         lx=ts[0];
         for x in ts[1:]:
             retG.append(100 * (x / lx));
@@ -60,13 +59,13 @@ class Garch11Model:
         testRandomData = []
         
         # Re-randomise garch
-        for i in range(0,10000):
+        for i in range(0,1000):
             self.gr.next();
             
         for i in range(0,numPoints-1):
             testRandomData.append(self.gr.next());
                 
-        return createPriceSeriesFromReturns(testRandomData, self.initialValue);
+        return createPriceSeriesFromReturns(testRandomData, self.ts[int(np.random.uniform() * len(self.ts))]);
         
 
 
