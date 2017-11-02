@@ -13,7 +13,7 @@ from GarchGenerator import Garch11Model
 from CsvDataImport import loadCsv;
 from keras.optimizers import Adam
 import keras;
-
+import matplotlib.pyplot as plt
 
 class LossHistory(keras.callbacks.Callback):
     
@@ -27,7 +27,21 @@ class LossHistory(keras.callbacks.Callback):
         if (l<self.minLoss):
             print("Saving new best model");
             self.model.save("model.keras")
-            self.minLoss = l;        
+            self.minLoss = l;
+
+class RangeNormaliser:
+    def __init__(self, origTs):
+        self.minInRealData = np.min(origTs);
+        self.maxInRealData = np.max(origTs);
+        
+        
+    def normalise(self, ts):
+        ts = np.subtract(ts, self.minInRealData);
+        ts = np.true_divide(ts, self.maxInRealData-self.minInRealData);
+        return ts;
+
+        
+        
         
 
 def rolling_window(arr, window):
@@ -52,7 +66,14 @@ descrModel = factory.create();
 
 
 tsList= loadCsv('../data/GBPUSD.csv');
-ts = np.array([x for y,x in tsList]);  
+origTs = np.array([x for y,x in tsList]);
+
+normaliser = RangeNormaliser(origTs);
+ts = normaliser.normalise(origTs);
+  
+# plt.figure("Normalised input series");
+# plt.plot(ts);
+# plt.show();
 
 
 windows = rolling_window(ts, windowSize);
@@ -71,16 +92,42 @@ for strideX in range(0, numRealSamples ):
 
 
 randomGenerators = [];
+forceCorrectRange = [];
+
 randomGenerators.append(WhiteNoiseModel());
+forceCorrectRange.append(False);
+
 randomGenerators.append(BrownianModel());
+forceCorrectRange.append(True);
+
 randomGenerators.append(Garch11Model());
+forceCorrectRange.append(True);
 
 for g in randomGenerators:
-    g.fit(ts);
+    g.fit(origTs);
+
+
 
 print("Generating synthetic series")
 for strideX in range(numRealSamples, numRealSamples+numFakeSamples ):
-    x[strideX] = randomGenerators[strideX % len(randomGenerators)].generate(windowSize)
+    x1 = strideX % len(randomGenerators);
+    tries = 0;
+    while True:
+        randomSeries = normaliser.normalise(randomGenerators[x1].generate(windowSize));
+        
+
+        
+        if not forceCorrectRange[x1] or ( np.min(randomSeries)>=0 and np.max(randomSeries)<=1 ):
+            break; 
+        #print("Regenerate ranodm series " + str(tries));
+        tries = tries +1;
+    
+#     plt.figure("Random input series");
+#     plt.plot(randomSeries);
+#     plt.show();
+    
+    
+    x[strideX] = randomSeries;
     y[strideX][1] = 1; 
 
 
