@@ -21,8 +21,16 @@ tsList= loadCsv('../data/GBPUSD.csv');
 trainedNet = keras.models.load_model('./model.keras');
 windowSize = 1000;
 
+
+
 numRealSamples = len(tsList)-windowSize;
 numFakeSamples = numRealSamples
+
+print("Num real samples")
+print(numRealSamples);
+print("Num Fake samples")
+print(numFakeSamples);
+
 generator = TrainingSetGenerator(windowSize = windowSize, 
                                    numRealSamples = numRealSamples,
                                    numFakeSamples = numFakeSamples);
