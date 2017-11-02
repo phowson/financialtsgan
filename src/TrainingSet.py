@@ -7,7 +7,7 @@ from  BrownianGenerator import BrownianModel
 from WhiteNoiseGenerator import WhiteNoiseModel
 from GarchGenerator import Garch11Model
 import numpy as np;
-
+import matplotlib.pyplot as plt
 
 class RangeNormaliser:
     def __init__(self, origTs):
@@ -62,9 +62,9 @@ class TrainingSetGenerator:
         normaliser = RangeNormaliser(origTs);
         ts = normaliser.normalise(origTs);
           
-        # plt.figure("Normalised input series");
-        # plt.plot(ts);
-        # plt.show();
+#         plt.figure("Normalised input series");
+#         plt.plot(ts);
+#         plt.show();
         
         
         windows = rolling_window(ts, self.windowSize);
@@ -74,10 +74,12 @@ class TrainingSetGenerator:
         
         x = np.zeros((self.numRealSamples+self.numFakeSamples, self.windowSize));
         y = np.zeros((self.numRealSamples+self.numFakeSamples, 2));
+        generatorUsed = [];
         
         for strideX in range(0, self.numRealSamples ):
             x[strideX] = windows[strideX][:]
-            y[strideX][0] = 1;    
+            y[strideX][0] = 1;
+            generatorUsed.append(None);
         
         
 
@@ -101,6 +103,8 @@ class TrainingSetGenerator:
                 #print("Regenerate ranodm series " + str(tries));
                 tries = tries +1;
             
+            generatorUsed.append(self.randomGenerators[x1])
+            
         #     plt.figure("Random input series");
         #     plt.plot(randomSeries);
         #     plt.show();
@@ -115,7 +119,7 @@ class TrainingSetGenerator:
         
         print("Created training set, with shape")
         print(x.shape);
-        return (x,y);
+        return (x,y, generatorUsed);
         
     
     

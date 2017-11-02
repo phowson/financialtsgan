@@ -44,7 +44,7 @@ dataSetSize = numRealSamples+numFakeSamples;
 trainingSet = TrainingSetGenerator(windowSize = windowSize, 
                                    numRealSamples = numRealSamples,
                                    numFakeSamples = numFakeSamples);
-x,y = trainingSet.create(tsList);
+x,y, generatorsUsed = trainingSet.create(tsList);
 
 
 history = LossHistory(descrModel);

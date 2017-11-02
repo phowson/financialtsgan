@@ -18,7 +18,7 @@ from TrainingSet import TrainingSetGenerator
 
 tsList= loadCsv('../data/GBPUSD.csv');
 
-trainedNet = keras.models.load_model('./trained.keras');
+trainedNet = keras.models.load_model('./model.keras');
 windowSize = 1000;
 
 numRealSamples = len(tsList)-windowSize;
@@ -27,7 +27,7 @@ generator = TrainingSetGenerator(windowSize = windowSize,
                                    numRealSamples = numRealSamples,
                                    numFakeSamples = numFakeSamples);
 dataSetSize = numRealSamples+numFakeSamples;                                    
-x, y = generator.create(tsList);
+x, y, generatorsUsed = generator.create(tsList);
                                    
 yPrime = trainedNet.predict(x);
 
@@ -44,12 +44,19 @@ for i in range(0, dataSetSize ):
     if isReal == predictedReal:
         correct = correct +1;
     else:
+        print("-----")
+        print("Did not predict correctly at index " + str(i))
+        print("Generator used = ")
+        print(generatorsUsed[i]);
+        
+        print("Predicted Y:")
         print(yPrime[i]);
+        print("Actual Y:")
         print(y[i]);
         print("Is real? " + str(isReal))
-        plt.figure("Failed to predict");
-        plt.plot(x[i]);
-        plt.show();
+        #plt.figure("Failed to predict");
+        #plt.plot(x[i]);
+        #plt.show();
 
 a = float(correct) / float(dataSetSize)
 print("Prediction accuracy = " + str(a));
