@@ -83,7 +83,7 @@ print("Failed to catch " + str(dataSetSize-correct) +" timeseries")
 
 print(errorsPerGenerator);
 
-with open("results.txt","w") as file: 
+with open("results.csv","w") as file: 
 
     for strideX in range(0, dataSetSize ):
         file.write(str(yPrime[strideX][0]))
@@ -93,5 +93,8 @@ with open("results.txt","w") as file:
         file.write(str(y[strideX][0]))
         file.write(',');
         file.write(str(y[strideX][1]))
+        file.write(',');
+        if generatorsUsed[strideX]!=None:
+            file.write(type(generatorsUsed[strideX]).__name__)
         
         file.write('\n');

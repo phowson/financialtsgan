@@ -49,16 +49,6 @@ x,y, generatorsUsed = trainingSet.create(tsList);
 
 history = LossHistory(descrModel);
 descrModel.fit(x, y,  
-              batch_size=256, epochs=500, verbose=1, callbacks=[history])
-
-
-yPrime = descrModel.predict(x);
-
-
-with open("results.txt","w") as file: 
-
-    for strideX in range(0, dataSetSize ):
-        file.write(str(yPrime[strideX]))
-        file.write('\n');
+              batch_size=512, epochs=500, verbose=1, callbacks=[history])
 
 
