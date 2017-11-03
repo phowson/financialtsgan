@@ -39,6 +39,8 @@ x, y, generatorsUsed = generator.create(tsList);
                                    
 yPrime = trainedNet.predict(x);
 
+
+errorsPerGenerator = dict();
 correct = 0;
 for i in range(0, dataSetSize ):
     predictedReal = False;
@@ -56,12 +58,21 @@ for i in range(0, dataSetSize ):
         print("Did not predict correctly at index " + str(i))
         print("Generator used = ")
         print(generatorsUsed[i]);
+                
         
         print("Predicted Y:")
         print(yPrime[i]);
         print("Actual Y:")
         print(y[i]);
         print("Is real? " + str(isReal))
+        
+        
+        if generatorsUsed[i]!=None:
+            name = type(generatorsUsed[i]).__name__;
+            if not name in errorsPerGenerator.keys():
+                errorsPerGenerator[name]=0;
+            errorsPerGenerator[name]=errorsPerGenerator[name]+1;
+        
         #plt.figure("Failed to predict");
         #plt.plot(x[i]);
         #plt.show();
@@ -69,6 +80,8 @@ for i in range(0, dataSetSize ):
 a = float(correct) / float(dataSetSize)
 print("Prediction accuracy = " + str(a));
 print("Failed to catch " + str(dataSetSize-correct) +" timeseries")
+
+print(errorsPerGenerator);
 
 with open("results.txt","w") as file: 
 
