@@ -12,20 +12,7 @@ from keras.optimizers import Adam
 import keras;
 import matplotlib.pyplot as plt
 from TrainingSet import TrainingSetGenerator
-
-class LossHistory(keras.callbacks.Callback):
-    
-    def __init__(self, model):
-        self.model = model;
-        self.minLoss = 9999e999;
-    
-
-    def on_epoch_end(self, batch, logs={}):
-        l = logs.get('loss');        
-        if (l<self.minLoss):
-            print("Saving new best model");
-            self.model.save("model.keras")
-            self.minLoss = l;
+import Helpers;
 
 
 
@@ -47,7 +34,7 @@ trainingSet = TrainingSetGenerator(windowSize = windowSize,
 x,y, generatorsUsed = trainingSet.create(tsList);
 
 
-history = LossHistory(descrModel);
+history = Helpers.LossHistory(descrModel, filename='descriminator.model');
 descrModel.fit(x, y,  
               batch_size=512, epochs=500, verbose=1, callbacks=[history])
 

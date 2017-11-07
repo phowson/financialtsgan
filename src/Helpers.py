@@ -1,4 +1,5 @@
 import numpy as np;
+import keras;
 
 def createPriceSeriesFromReturns(l, initial, ticksize):
     
@@ -17,3 +18,18 @@ def make_trainable(net, val):
     for l in net.layers:
         l.trainable = val
 
+
+class LossHistory(keras.callbacks.Callback):
+    
+    def __init__(self, model, filename = 'model.keras'):
+        self.model = model;
+        self.minLoss = 9999e999;
+        self.filename = filename;
+    
+
+    def on_epoch_end(self, batch, logs={}):
+        l = logs.get('loss');        
+        if (l<self.minLoss):
+            print("Saving new best model");
+            self.model.save(self.filename)
+            self.minLoss = l;
