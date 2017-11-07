@@ -35,7 +35,7 @@ randomShape=100;
 ntrain = 10000
 windowSize =1000;
 
-generatorFactory = Generator.GeneratorFactory(dropout_rate=0.25,dopt=optimizer, shp=[randomShape]);
+generatorFactory = Generator.GeneratorFactory(dopt=optimizer, shp=[randomShape]);
 
 Helpers.make_trainable(descriminator,False)
 generator, g_input = generatorFactory.create();

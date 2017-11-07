@@ -22,9 +22,8 @@ from keras.models import Model
 
 
 class GeneratorFactory:
-    def __init__(self, dropout_rate, dopt, shp=[100]):
+    def __init__(self, dopt, shp=[100]):
         self.randomInputShape = shp;
-        self.dropout_rate= dropout_rate;
         self.dopt = dopt; 
     
     
@@ -32,11 +31,11 @@ class GeneratorFactory:
         g_input = Input(shape=self.randomInputShape)
         
         #
-        H = Dense(nch*2, kernel_initializer="glorot_normal")(g_input)
+        H = Dense(nch*4, kernel_initializer="glorot_normal")(g_input)
         H = BatchNormalization()(H)
         H = Activation('relu')(H)
-        H = Reshape( [nch*2, 1] )(H)
-        H = UpSampling1D(size=4)(H)
+        H = Reshape( [nch*4, 1] )(H)
+        H = UpSampling1D(size=2)(H)
         H = Conv1D(int(nch/2), 3, padding='same', kernel_initializer='glorot_uniform')(H)
         H = BatchNormalization()(H)
         H = Activation('relu')(H)
