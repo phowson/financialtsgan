@@ -21,7 +21,7 @@ config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 K.set_session(session)
 
-trainedNet = keras.models.load_model('./generator_gen999.model2');
+trainedNet = keras.models.load_model('./gan_350.model');
 
 trainedNet.summary();
 ganTrainingSet = trainedNet.get_layer("Generator_model");

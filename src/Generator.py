@@ -22,20 +22,23 @@ from keras.models import Model
 
 
 class GeneratorFactory:
-    def __init__(self, dopt, shp=[100]):
+    def __init__(self, dopt, shp=[25]):
         self.randomInputShape = shp;
         self.dopt = dopt; 
     
     
-    def create(self, nch = 125):
+    def create(self, nch = 100):
         g_input = Input(shape=self.randomInputShape)
         
         #
-        H = Dense(nch*4, kernel_initializer="glorot_normal")(g_input)
+        H = Dense(nch*5, kernel_initializer="glorot_normal")(g_input)
         H = BatchNormalization()(H)
         H = Activation('relu')(H)
-        H = Reshape( [nch*4, 1] )(H)
+        H = Reshape( [nch*5, 1] )(H)
         H = UpSampling1D(size=2)(H)
+        H = Conv1D(2, 10, padding='same', kernel_initializer='glorot_uniform')(H)
+        H = BatchNormalization()(H)
+        H = Activation('relu')(H)
         H = Conv1D(int(nch/2), 5, padding='same', kernel_initializer='glorot_uniform')(H)
         H = BatchNormalization()(H)
         H = Activation('relu')(H)

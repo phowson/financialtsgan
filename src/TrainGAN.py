@@ -30,8 +30,7 @@ K.set_session(session)
 
 
 optimizer = Adam(lr=1e-4)
-randomShape=100;
-ntrain = 10000
+randomShape=25;
 windowSize =1000;
 useSavedDescriminator=False;
 
@@ -54,15 +53,16 @@ GAN.summary()
 generatorNN = GAN.get_layer("Generator_model");
 tsList= loadCsv('../data/GBPUSD.csv');
 
-y = np.zeros((ntrain, 2));
-for z in range(0, ntrain ):
+samples =len(tsList)-windowSize-1
+
+y = np.zeros((samples, 2));
+for z in range(0, samples ):
     y[z][0] = 1;
 
 # history = Helpers.LossHistory(generator, filename='generator.model')
 # descHistory = Helpers.LossHistory(generator, filename='descriminator2.model')
-noise_gen = np.random.uniform(0,1,size=[ntrain,randomShape])
+noise_gen = np.random.uniform(0,1,size=[samples,randomShape])
 
-samples =len(tsList)-windowSize-1
 ganTrainingSet = TrainingSet.GANTrainingSetGenerator(windowSize=windowSize, numRealSamples=samples, numFakeSamples=samples, tsList=tsList)
 
 # Also make a descriminator only set
@@ -77,7 +77,7 @@ for epoch in range (0,1000):
     print("Epoch " + str(epoch))
     print("Train generator");
     GAN.fit(noise_gen, y,  
-           batch_size=128, epochs=1, verbose=1)
+           batch_size=128, epochs=2, verbose=1)
     yPrime = generatorNN.predict(noise_gen);
     xTrain, yTrain = ganTrainingSet.create(yPrime);
     
