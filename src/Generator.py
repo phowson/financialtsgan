@@ -36,7 +36,7 @@ class GeneratorFactory:
         H = Activation('relu')(H)
         H = Reshape( [nch*4, 1] )(H)
         H = UpSampling1D(size=2)(H)
-        H = Conv1D(int(nch/2), 3, padding='same', kernel_initializer='glorot_uniform')(H)
+        H = Conv1D(int(nch/2), 5, padding='same', kernel_initializer='glorot_uniform')(H)
         H = BatchNormalization()(H)
         H = Activation('relu')(H)
         H = Conv1D(int(nch/4), 3, padding='same', kernel_initializer='glorot_uniform')(H)

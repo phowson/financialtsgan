@@ -4,7 +4,6 @@ Created on 30 Oct 2017
 @author: phil
 '''
 
-from keras.utils import np_utils
 import keras.models as models
 from keras.layers import Input,merge
 from keras.layers.core import Reshape,Dense,Dropout,Activation,Flatten

@@ -15,6 +15,7 @@ import keras;
 import matplotlib.pyplot as plt
 import random;
 import Helpers;
+import Descriminator
 from Generator import GeneratorFactory
 from keras.models import Model
 from keras import backend as K
@@ -27,13 +28,19 @@ config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 K.set_session(session)
 
-descriminator = keras.models.load_model('./descriminator.keras');
 
-descriminator.summary();
 optimizer = Adam(lr=1e-4)
 randomShape=100;
 ntrain = 10000
 windowSize =1000;
+useSavedDescriminator=False;
+
+if useSavedDescriminator:
+    descriminator = keras.models.load_model('./descriminator.keras');
+else:
+    descriminator = Descriminator.DescriminatorFactory((windowSize,1), 0.25, Adam(lr=1e-3)).create();
+
+descriminator.summary();
 
 generatorFactory = Generator.GeneratorFactory(dopt=optimizer, shp=[randomShape]);
 
@@ -56,20 +63,30 @@ for z in range(0, ntrain ):
 noise_gen = np.random.uniform(0,1,size=[ntrain,randomShape])
 
 samples =len(tsList)-windowSize-1
-gen = TrainingSet.GANTrainingSetGenerator(windowSize=windowSize, numRealSamples=samples, numFakeSamples=samples, tsList=tsList)
+ganTrainingSet = TrainingSet.GANTrainingSetGenerator(windowSize=windowSize, numRealSamples=samples, numFakeSamples=samples, tsList=tsList)
 
-for epoch in range (0,100):
+# Also make a descriminator only set
+trainingSet = TrainingSet.TrainingSetGenerator(windowSize = windowSize, 
+                                   numRealSamples = samples,
+                                   numFakeSamples = samples);
+descrX,descrY, _ = trainingSet.create(tsList);
+
+
+for epoch in range (0,1000):
     
     print("Epoch " + str(epoch))
     print("Train generator");
     GAN.fit(noise_gen, y,  
-           batch_size=128, epochs=2, verbose=1)
+           batch_size=128, epochs=1, verbose=1)
     yPrime = generatorNN.predict(noise_gen);
-    xTrain, yTrain = gen.create(yPrime);
+    xTrain, yTrain = ganTrainingSet.create(yPrime);
     
     print("Train descriminator");
-    descriminator.fit(xTrain, yTrain, batch_size=128, epochs=2, verbose=1)
+    descriminator.fit(xTrain, yTrain, batch_size=128, epochs=1, verbose=1)
     
-    GAN.save('generator_gen' + str(epoch) +".model");
+    print("Train descriminator with traditional training set");
+    descriminator.fit(descrX, descrY, batch_size=128, epochs=1, verbose=1)
+    
+    GAN.save('gan_' + str(epoch) +".model");
     
     

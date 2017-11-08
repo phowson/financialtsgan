@@ -21,17 +21,17 @@ config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 K.set_session(session)
 
-trainedNet = keras.models.load_model('./generator_gen39.model');
+trainedNet = keras.models.load_model('./generator_gen999.model2');
 
 trainedNet.summary();
-gen = trainedNet.get_layer("Generator_model");
+ganTrainingSet = trainedNet.get_layer("Generator_model");
 
 randomShape=100;
 ntrain = 1000
 x = np.random.uniform(0,1,size=[ntrain,randomShape])
 
 
-yPrime = gen.predict(x);
+yPrime = ganTrainingSet.predict(x);
 acc = trainedNet.predict(x);
 
 for i in range(0,ntrain):
