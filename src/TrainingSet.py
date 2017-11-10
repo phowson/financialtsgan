@@ -38,6 +38,35 @@ def rolling_window(arr, window):
     return np.lib.stride_tricks.as_strided(arr, shape=shape, strides=strides)        
 
 
+
+class SingleStepTrainingSetGenerator:
+    
+    def __init__(self, windowSize, numRealSamples, tsList):
+        self.numRealSamples = numRealSamples;
+        self.windowSize = windowSize;
+        origTs = np.array([x for _,x in tsList]);        
+        normaliser = RangeNormaliser(origTs);
+        self.ts = normaliser.normalise(origTs);
+        
+    def create(self):
+        
+        
+        x = np.zeros((self.numRealSamples, self.windowSize));
+        y = np.zeros((self.numRealSamples, 1));
+        
+        windows = rolling_window(self.ts, self.windowSize);
+        
+        for strideX in range(0, self.numRealSamples ):
+            x[strideX] = windows[strideX][:]
+            y[strideX][0] = self.ts[strideX+self.windowSize+1];
+          
+        x=np.reshape(x, (self.numRealSamples, self.windowSize, 1))
+        
+        return (x,y)
+            
+            
+
+
 class GANTrainingSetGenerator:
     
     def __init__(self, windowSize, numRealSamples, numFakeSamples, tsList):

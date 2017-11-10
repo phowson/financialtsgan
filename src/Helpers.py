@@ -29,6 +29,9 @@ class LossHistory(keras.callbacks.Callback):
 
     def on_epoch_end(self, batch, logs={}):
         l = logs.get('loss');        
+        print("Loss:")
+        print(l)
+        
         if (l<self.minLoss):
             print("Saving new best model");
             self.model.save(self.filename)

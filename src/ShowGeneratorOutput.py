@@ -21,12 +21,12 @@ config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 K.set_session(session)
 
-trainedNet = keras.models.load_model('./gan_350.model');
+trainedNet = keras.models.load_model('./gan_306.model');
 
 trainedNet.summary();
 ganTrainingSet = trainedNet.get_layer("Generator_model");
 
-randomShape=100;
+randomShape=25;
 ntrain = 1000
 x = np.random.uniform(0,1,size=[ntrain,randomShape])
 
@@ -37,10 +37,10 @@ acc = trainedNet.predict(x);
 for i in range(0,ntrain):
     
     series = yPrime[i];
-    
-    plt.figure(str(acc[i]));
-    plt.plot(series);
-    plt.show();
+    if(acc[i][0]>0.9):
+        plt.figure(str(acc[i]));
+        plt.plot(series);
+        plt.show();
 
     
 

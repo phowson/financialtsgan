@@ -20,7 +20,7 @@ windowSize = 1000;
 
 optimizer = Adam(lr=1e-3)
 factory = Descriminator.DescriminatorFactory((windowSize,1), 0.25, optimizer)
-descrModel = factory.create();
+genModel = factory.create();
 
 tsList= loadCsv('../data/GBPUSD.csv');
 
@@ -34,8 +34,8 @@ trainingSet = TrainingSetGenerator(windowSize = windowSize,
 x,y, generatorsUsed = trainingSet.create(tsList);
 
 
-history = Helpers.LossHistory(descrModel, filename='descriminator.model');
-descrModel.fit(x, y,  
+history = Helpers.LossHistory(genModel, filename='descriminator.model');
+genModel.fit(x, y,  
               batch_size=512, epochs=500, verbose=1, callbacks=[history])
 
 
