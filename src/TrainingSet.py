@@ -50,15 +50,15 @@ class SingleStepTrainingSetGenerator:
         
     def create(self):
         
-        
+        overallLen = len(self.ts);
         x = np.zeros((self.numRealSamples, self.windowSize));
         y = np.zeros((self.numRealSamples, 1));
         
         windows = rolling_window(self.ts, self.windowSize);
-        
-        for strideX in range(0, self.numRealSamples ):
-            x[strideX] = windows[strideX][:]
-            y[strideX][0] = self.ts[strideX+self.windowSize+1];
+        leftOver = overallLen - self.numRealSamples - self.windowSize-1;
+        for strideX in range(leftOver, self.numRealSamples+leftOver ):
+            x[strideX-leftOver] = windows[strideX][:]
+            y[strideX-leftOver][0] = self.ts[strideX+self.windowSize+1];
           
         x=np.reshape(x, (self.numRealSamples, self.windowSize, 1))
         
