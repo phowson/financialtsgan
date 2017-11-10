@@ -19,8 +19,8 @@ from keras.models import Model
 from keras.utils import plot_model
 import math
 windowSize = 100;
-
-optimizer = Adam(lr=1e-3)
+batchSize=128
+optimizer = Adam()
 factory = SingleStepGenerator.GeneratorFactory(shp=(windowSize,1), dopt = optimizer)
 genModel, g_input = factory.create();
 o_input = Input(shape=[1]);
@@ -28,7 +28,7 @@ o_input = Input(shape=[1]);
 lossModel = factory.createLossModel(overallInput=g_input, generatorOutput=genModel(g_input), observed=o_input);
 
 lossModel.summary();
-batchSize=128
+
 
 
 
@@ -50,7 +50,7 @@ plot_model(lossModel, to_file='model.png')
 
 
 lossModel.fit([x,y],  
-              batch_size=batchSize, epochs=10, verbose=1)
+              batch_size=batchSize, epochs=20, verbose=1)
 #, callbacks=[history])
 
 
