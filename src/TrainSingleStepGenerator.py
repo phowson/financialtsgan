@@ -57,15 +57,20 @@ lossModel.fit([x,y],
 predictions = genModel.predict(x)
 
 
-
-print(x[0]);
-print(predictions[0][0])
-print(predictions[1][0])
-
 plt.figure("Actual");
-plt.plot(np.array([x for _,x in tsList])     );
+
+act = np.array([x for _,x in tsList]) 
+plt.plot(act    );
 plt.figure("Predicted means");
-plt.plot(predictions[0]);
+
+v1= predictions[0]+predictions[1];
+v2= predictions[0]-predictions[1];
+plt.hold(True);
+plt.plot(trainingSet.denormalise(predictions[0]), 'r');
+plt.plot(trainingSet.denormalise(v1), 'b');
+plt.plot(trainingSet.denormalise(v2), 'b');
+plt.plot(act,'g');
+
 plt.figure("Predicted variance");
 plt.plot(predictions[1]);
 plt.show();

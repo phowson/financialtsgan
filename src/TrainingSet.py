@@ -8,6 +8,7 @@ from WhiteNoiseGenerator import WhiteNoiseModel
 from GarchGenerator import Garch11Model
 import numpy as np;
 import matplotlib.pyplot as plt
+import math;
 
 class RangeNormaliser:
     def __init__(self, origTs):
@@ -18,6 +19,11 @@ class RangeNormaliser:
     def normalise(self, ts):
         ts = np.subtract(ts, self.minInRealData);
         ts = np.true_divide(ts, self.maxInRealData-self.minInRealData);
+        return ts;
+
+    def denormalise(self, ts):
+        ts = np.multiply(ts, self.maxInRealData-self.minInRealData);
+        ts = np.add(ts, self.minInRealData);
         return ts;
 
         
@@ -44,10 +50,19 @@ class SingleStepTrainingSetGenerator:
     def __init__(self, windowSize, numRealSamples, tsList):
         self.numRealSamples = numRealSamples;
         self.windowSize = windowSize;
-        origTs = np.array([x for _,x in tsList]);        
-        normaliser = RangeNormaliser(origTs);
-        self.ts = normaliser.normalise(origTs);
         
+        origTs = np.array([x for _,x in tsList]);
+        logTs = [ math.log(x) for x in origTs];
+        self.normaliser = RangeNormaliser(logTs);        
+        
+        self.ts = self.normaliser.normalise(logTs);
+    
+    
+    def denormalise(self, ts =None):
+        if ts is None:
+            ts = self.ts;
+        return [math.exp(x) for x in self.normaliser.denormalise(ts)]
+    
     def create(self):
         
         overallLen = len(self.ts);

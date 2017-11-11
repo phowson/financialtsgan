@@ -35,7 +35,7 @@ class TanhNormalPDFLayer(Layer):
         
         
         pdfValue = self.scalingFactor  * K.exp(-K.square(observation - mu) / (2 * sigmaSquared) ) / K.sqrt(sigmaSquared)
-        
+        #logLikelyhood = K.log(pdfValue)
         # We need this positive and in a reasonable range
         loss = 1-K.tanh(pdfValue);
         self.add_loss(loss, inputs=inputs)
