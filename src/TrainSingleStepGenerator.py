@@ -18,7 +18,7 @@ from keras.layers import Input
 from keras.models import Model
 from keras.utils import plot_model
 import math
-windowSize = 100;
+windowSize = 20;
 batchSize=128
 optimizer = Adam()
 factory = SingleStepGenerator.GeneratorFactory(shp=(windowSize,1), dopt = optimizer)
@@ -50,8 +50,8 @@ plot_model(lossModel, to_file='model.png')
 
 
 lossModel.fit([x,y],  
-              batch_size=batchSize, epochs=20, verbose=1)
-#, callbacks=[history])
+              batch_size=batchSize, epochs=40, verbose=1
+            ,callbacks=[history])
 
 
 predictions = genModel.predict(x)
@@ -63,13 +63,13 @@ act = np.array([x for _,x in tsList])
 plt.plot(act    );
 plt.figure("Predicted means");
 
-v1= predictions[0]+predictions[1];
-v2= predictions[0]-predictions[1];
+v1= predictions[0]+np.sqrt(predictions[1]);
+v2= predictions[0]-np.sqrt(predictions[1]);
 plt.hold(True);
 plt.plot(trainingSet.denormalise(predictions[0]), 'r');
 plt.plot(trainingSet.denormalise(v1), 'b');
 plt.plot(trainingSet.denormalise(v2), 'b');
-plt.plot(act,'g');
+plt.plot(trainingSet.denormalise(y),'g');
 
 plt.figure("Predicted variance");
 plt.plot(predictions[1]);

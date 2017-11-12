@@ -20,12 +20,12 @@ import math;
 
 
 #Custom loss funciton
-class TanhNormalPDFLayer(Layer):
+class NormalPDFLogLikelyhoodLayer(Layer):
     
     def __init__(self, **kwargs):
         self.is_placeholder = True
         self.scalingFactor = 1./math.sqrt(2*math.pi);
-        super(TanhNormalPDFLayer, self).__init__(**kwargs)    
+        super(NormalPDFLogLikelyhoodLayer, self).__init__(**kwargs)    
 
     def call(self, inputs):
         mu = inputs[0];
@@ -35,9 +35,15 @@ class TanhNormalPDFLayer(Layer):
         
         
         pdfValue = self.scalingFactor  * K.exp(-K.square(observation - mu) / (2 * sigmaSquared) ) / K.sqrt(sigmaSquared)
-        #logLikelyhood = K.log(pdfValue)
-        # We need this positive and in a reasonable range
-        loss = 1-K.tanh(pdfValue);
+        
+        
+        # Having some issues with stability
+        logLikelyhood = K.log(1+pdfValue)
+        loss = -K.mean(logLikelyhood);
+        
+        
+        #logLikelyhood = K.mean(K.log(sigmaSquared)-K.square(observation - mu)/ (2*sigmaSquared));
+        #loss = logLikelyhood;
         self.add_loss(loss, inputs=inputs)
         
         # Output is not relevant
@@ -53,16 +59,16 @@ class GeneratorFactory:
         
         g_input = Input(shape=self.inputShape)
         H = g_input
-        H = Conv1D(128,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H)       
+        H = Conv1D(16,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H)       
         H = LeakyReLU(0.1)(H)        
         H = Dropout(self.dropout_rate)(H)
-        H = Conv1D(32,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H)
+        H = Conv1D(8,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H)
         H = LeakyReLU(0.1)(H)
         H = Dropout(self.dropout_rate)(H)        
         H = Flatten()(H)
 
-        H = Dense(16)(H)
-        H = LeakyReLU(0.1)(H)
+#         H = Dense(16)(H)
+#         H = LeakyReLU(0.1)(H)
         H = Dense(8)(H)
         H = LeakyReLU(0.1)(H)
         
@@ -71,16 +77,16 @@ class GeneratorFactory:
         
 
         H2 = g_input
-        H2 = Conv1D(128,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H2)       
+        H2 = Conv1D(16,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H2)       
         H2 = LeakyReLU(0.1)(H2)        
         H2 = Dropout(self.dropout_rate)(H2)
-        H2 = Conv1D(32,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H2)
+        H2 = Conv1D(8,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H2)
         H2 = LeakyReLU(0.1)(H2)
         H2 = Dropout(self.dropout_rate)(H2)        
         H2 = Flatten()(H2)
 
-        H2 = Dense(16)(H2)
-        H2 = LeakyReLU(0.1)(H2)
+#         H2 = Dense(16)(H2)
+#         H2 = LeakyReLU(0.1)(H2)
         H2 = Dense(8)(H2)
         H2 = LeakyReLU(0.1)(H2)
         
@@ -96,7 +102,7 @@ class GeneratorFactory:
     def createLossModel(self, overallInput, generatorOutput, observed):
         
         
-        H=TanhNormalPDFLayer()([generatorOutput[0],generatorOutput[1], observed]);
+        H=NormalPDFLogLikelyhoodLayer()([generatorOutput[0],generatorOutput[1], observed]);
         lossModel = Model([overallInput,observed],H , name="Loss_model")
         lossModel.compile(loss=None, optimizer="rmsprop")
         
