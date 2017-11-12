@@ -53,15 +53,22 @@ class SingleStepTSGenerator:
 tsList= loadCsv('../data/GBPUSD.csv');
 
 
-descrWindowSize = 1000;
-generatorWindowSize = 20
+descrWindowSize = 8000;
+generatorWindowSize = 40
 
 
 singleStepGenModel =keras.models.load_model('./singlestepgenerator.model', custom_objects={"NormalPDFLogLikelyhoodLayer": NormalPDFLogLikelyhoodLayer});
 tsg = SingleStepTSGenerator(singleStepGenModel, generatorWindowSize, descrWindowSize, np.array([x[1] for x in tsList]));
 
 plt.plot(tsg.generate());
+plt.figure();
+#plt.hold(True);
+
+plt.plot(tsg.inputData);
+
 plt.show();
+
+
 
 quit();
 

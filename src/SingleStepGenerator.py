@@ -1,7 +1,7 @@
 
 from keras.utils import np_utils
 import keras.models as models
-from keras.layers import Input,merge
+from keras.layers import Input,merge, Concatenate
 from keras.layers.core import Reshape,Dense,Dropout,Activation,Flatten
 from keras.layers.advanced_activations import LeakyReLU
 from keras.activations import *
@@ -59,39 +59,48 @@ class GeneratorFactory:
         
         g_input = Input(shape=self.inputShape)
         H = g_input
-        H = Conv1D(16,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H)       
+        H = Conv1D(128,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H)       
         H = LeakyReLU(0.1)(H)        
         H = Dropout(self.dropout_rate)(H)
-        H = Conv1D(8,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H)
+        H = Conv1D(32,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H)
         H = LeakyReLU(0.1)(H)
         H = Dropout(self.dropout_rate)(H)        
         H = Flatten()(H)
 
-#         H = Dense(16)(H)
-#         H = LeakyReLU(0.1)(H)
-        H = Dense(8)(H)
+        H = Dense(16)(H)
         H = LeakyReLU(0.1)(H)
-        
+        H = Dense(8)(H)
+        H = LeakyReLU(0.1)(H)        
         H = Dropout(self.dropout_rate)(H)
-        g_V1 = Dense(1,activation='sigmoid', name='PredictedMean')(H)
-        
+        LowLevelMean = Dense(1)(H);
 
         H2 = g_input
-        H2 = Conv1D(16,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H2)       
+        H2 = Conv1D(128,  kernel_size=5, strides=2, dilation_rate=1,  padding = 'same', activation='relu')(H2)       
         H2 = LeakyReLU(0.1)(H2)        
         H2 = Dropout(self.dropout_rate)(H2)
-        H2 = Conv1D(8,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H2)
+        H2 = Conv1D(32,  kernel_size=3, strides=2, dilation_rate=1, padding = 'same', activation='relu')(H2)
         H2 = LeakyReLU(0.1)(H2)
         H2 = Dropout(self.dropout_rate)(H2)        
         H2 = Flatten()(H2)
 
-#         H2 = Dense(16)(H2)
-#         H2 = LeakyReLU(0.1)(H2)
+        H2 = Dense(16)(H2)
+        H2 = LeakyReLU(0.1)(H2)
         H2 = Dense(8)(H2)
         H2 = LeakyReLU(0.1)(H2)
         
         H2 = Dropout(self.dropout_rate)(H2)
+        LowLevelVar = Dense(1)(H2);
+        H2 = Concatenate()([H2, LowLevelMean]);
+        
         g_V2 = Dense(1,activation='sigmoid', name="PredictedVariance")(H2)
+
+
+        #
+
+        H = Concatenate()([H, LowLevelVar])
+        
+        g_V1 = Dense(1,activation='sigmoid', name='PredictedMean')(H)
+
 
         generator = Model(g_input,[g_V1, g_V2] , name="Generator_model")
         generator.compile(loss='mse', optimizer=self.dopt)
