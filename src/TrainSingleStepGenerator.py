@@ -18,17 +18,23 @@ from keras.layers import Input
 from keras.models import Model
 from keras.utils import plot_model
 import math
-windowSize = 40;
-batchSize=128
+import tensorflow as tf;
+from keras import backend as K
+from SingleStepRandomGenerator import SingleStepTSGenerator
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+K.set_session(session)
+
+
+windowSize = 30;
+batchSize=64
 optimizer = Adam()
 factory = SingleStepGenerator.GeneratorFactory(shp=(windowSize,1), dopt = optimizer)
-genModel, g_input = factory.create();
+genModel, g_input = factory.createLSTM(batch_size=batchSize, look_back = windowSize);
 o_input = Input(shape=[1]);
 
 lossModel = factory.createLossModel(overallInput=g_input, generatorOutput=genModel(g_input), observed=o_input);
-
-lossModel.summary();
-
 
 
 
@@ -45,16 +51,33 @@ x,y = trainingSet.create();
 
 history = Helpers.LossHistory(genModel, filename='singlestepgenerator.model');
 
+
+
 plot_model(genModel, to_file='gen_model.png')
 plot_model(lossModel, to_file='model.png')
 
-
-lossModel.fit([x,y],  
-              batch_size=batchSize, epochs=1000, verbose=1
-            ,callbacks=[history])
+print(x.shape);
+#quit();
 
 
-predictions = genModel.predict(x)
+for i in range(200):
+    lossModel.fit([x,y],  
+                  batch_size=batchSize, epochs=1, verbose=1
+                ,callbacks=[history], shuffle=False)
+    lossModel.reset_states()
+    
+    print(i);
+
+
+
+
+tsg = SingleStepTSGenerator(genModel, windowSize, 1000, np.array([x[1] for x in tsList]), batchSize);
+
+plt.figure("Random generator");
+plt.plot(trainingSet.denormalise(tsg.generate()));
+
+genModel.reset_states();
+predictions = genModel.predict(x, batch_size=batchSize)
 
 
 plt.figure("Actual");

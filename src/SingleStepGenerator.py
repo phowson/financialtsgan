@@ -15,6 +15,7 @@ from keras.datasets import mnist
 from keras.models import Model
 from keras.layers import Layer
 from keras import backend as K
+from keras.layers import LSTM
 import math;
 
 
@@ -54,6 +55,44 @@ class GeneratorFactory:
         self.inputShape = shp;
         self.dopt = dopt; 
         self.dropout_rate = dropout_rate;
+        
+    def createLSTM(self, look_back = 10, batch_size = 128):
+        g_input = Input(shape=self.inputShape, batch_shape = (batch_size,look_back, 1))
+        H = g_input
+        H = LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True, return_sequences=True)(H);
+        H = LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True)(H);
+        H = Dense(16)(H)
+        H = LeakyReLU(0.1)(H)
+        H = Dense(8)(H)
+        H = LeakyReLU(0.1)(H)
+        LowLevelMean = Dense(1, activation = "sigmoid")(H);
+        
+        
+        H2 = g_input
+        H2 = LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True, return_sequences=True)(H2);
+        H2 = LSTM(4, batch_input_shape=(batch_size, look_back, 1), stateful=True)(H2);
+        H2 = Dense(16)(H2)
+        H2 = LeakyReLU(0.1)(H2)
+        H2 = Dense(8)(H2)
+        H2 = LeakyReLU(0.1)(H2)
+        LowLevelVar = Dense(1, activation = "sigmoid")(H2);
+        
+        H2 = Concatenate()([H2, LowLevelMean]);
+        
+        g_V2 = Dense(1,activation='sigmoid', name="PredictedVariance")(H2)
+
+
+        #
+
+        H = Concatenate()([H, LowLevelVar])
+        
+        g_V1 = Dense(1,activation='sigmoid', name='PredictedMean')(H)
+
+
+        generator = Model(g_input,[g_V1, g_V2] , name="Generator_model")
+        generator.compile(loss='mse', optimizer=self.dopt)
+        generator.summary()
+        return generator, g_input
         
     def create(self, nch = 100):
         

@@ -14,51 +14,32 @@ from keras.optimizers import Adam
 import keras;
 import matplotlib.pyplot as plt
 import math;
-from TrainingSet import TrainingSetGenerator,rolling_window, RangeNormaliser
+
+import tensorflow as tf;
+from keras import backend as K
+from SingleStepRandomGenerator import SingleStepTSGenerator
 
 
-class SingleStepTSGenerator:
-    def __init__(self, model, windowSize, outWindowSize, inputData):
-        self.model = model;
-        normaliser = RangeNormaliser(inputData);
-        
-        self.windowSize = windowSize;
-        self.outWindowSize = outWindowSize;
-        self.genBuffer = np.zeros((windowSize));
-        self.inputData = normaliser.normalise(inputData);
-        
-        
-    def generate(self):
-        rw = rolling_window(self.inputData, self.windowSize);
-        startx = int(np.random.uniform() * (self.inputData.shape[0] - self.windowSize));
-        self.genBuffer[0:] = rw[startx][:];
-        gb = np.reshape(self.genBuffer, (1,self.windowSize,1));
-        outBuffer = np.zeros((self.outWindowSize));
-        self.model.summary();
-        m = self.model.get_layer("Generator_model");
-        
-        for i in range(0, self.outWindowSize):
-            p = m.predict(gb);
-            rs = p[0][0] + np.random.normal()*math.sqrt(p[1][0]) ;
-            outBuffer[i] = rs;
-            
-            for z in range(0, self.genBuffer.shape[0]-1):
-                gb[0][z][0] = gb[0][z+1][0];
-            gb[0][self.genBuffer.shape[0]-1][0] = rs;
-            
-            #plt.plot(self.genBuffer);
-            #plt.show();
-        return outBuffer;
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+K.set_session(session)
     
 tsList= loadCsv('../data/GBPUSD.csv');
 
 
 descrWindowSize = 8000;
-generatorWindowSize = 40
+generatorWindowSize = 10
+batchSize = 128;
 
 
 singleStepGenModel =keras.models.load_model('./singlestepgenerator.model', custom_objects={"NormalPDFLogLikelyhoodLayer": NormalPDFLogLikelyhoodLayer});
-tsg = SingleStepTSGenerator(singleStepGenModel, generatorWindowSize, descrWindowSize, np.array([x[1] for x in tsList]));
+m = singleStepGenModel.get_layer("Generator_model");
+m.summary();
+#m = singleStepGenModel
+
+
+tsg = SingleStepTSGenerator(m, generatorWindowSize, descrWindowSize, np.array([x[1] for x in tsList]), batchSize);
 
 plt.plot(tsg.generate());
 plt.figure();
