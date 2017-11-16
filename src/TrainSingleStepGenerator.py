@@ -49,7 +49,7 @@ x,y = trainingSet.create();
 
 
 
-history = Helpers.LossHistory(genModel, filename='singlestepgenerator.model');
+history = Helpers.LossHistory(lossModel, filename='singlestepgenerator.model');
 
 
 
@@ -60,7 +60,7 @@ print(x.shape);
 #quit();
 
 
-for i in range(200):
+for i in range(400):
     lossModel.fit([x,y],  
                   batch_size=batchSize, epochs=1, verbose=1
                 ,callbacks=[history], shuffle=False)

@@ -77,6 +77,11 @@ class SingleStepTrainingSetGenerator:
           
         x=np.reshape(x, (self.numRealSamples, self.windowSize, 1))
         
+        
+#         q = np.reshape(x[1], (self.windowSize));
+#         print(q.shape);
+#         plt.plot(q);
+#         plt.show();
         return (x,y)
             
             
