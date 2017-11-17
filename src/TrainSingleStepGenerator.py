@@ -27,8 +27,8 @@ session = tf.Session(config=config)
 K.set_session(session)
 
 
-windowSize = 30;
-batchSize=64
+windowSize = 20;
+batchSize=128
 optimizer = Adam()
 factory = SingleStepGenerator.GeneratorFactory(shp=(windowSize,1), dopt = optimizer)
 genModel, g_input = factory.createLSTM(batch_size=batchSize, look_back = windowSize);

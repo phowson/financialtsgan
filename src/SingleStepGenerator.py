@@ -39,7 +39,7 @@ class NormalPDFLogLikelyhoodLayer(Layer):
         
         
         # Having some issues with stability
-        logLikelyhood = K.log(1+pdfValue)
+        logLikelyhood = K.log(pdfValue)
         loss = -K.mean(logLikelyhood);
         
         
@@ -48,7 +48,7 @@ class NormalPDFLogLikelyhoodLayer(Layer):
         self.add_loss(loss, inputs=inputs)
         
         # Output is not relevant
-        return inputs;
+        return inputs[0:1];
 
 class GeneratorFactory:
     def __init__(self, dopt, shp=[25], dropout_rate = 0.25):
