@@ -38,9 +38,9 @@ class NormalPDFLogLikelyhoodLayer(Layer):
         pdfValue = self.scalingFactor  * K.exp(-K.square(observation - mu) / (2 * sigmaSquared) ) / K.sqrt(sigmaSquared)
         
         
-        # Having some issues with stability
         logLikelyhood = K.log(pdfValue)
-        loss = -K.mean(logLikelyhood);
+        # Having some issues with stability
+        loss = K.exp(-K.mean(logLikelyhood));
         
         
         #logLikelyhood = K.mean(K.log(sigmaSquared)-K.square(observation - mu)/ (2*sigmaSquared));

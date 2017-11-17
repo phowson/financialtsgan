@@ -41,7 +41,7 @@ class SingleStepTSGenerator:
         for i in range(0, self.outWindowSize):
             #print(gb.shape)
             p = self.model.predict(gb, batch_size=self.batch_size);
-            rs = p[0][self.windowSize-1] + np.random.normal()*math.sqrt(p[1][self.windowSize-1]) ;
+            rs = p[0][self.windowSize-1] + np.random.normal(scale = math.sqrt(p[1][self.windowSize-1])) ;
             outBuffer[i] = rs;
             
             
