@@ -60,7 +60,7 @@ print(x.shape);
 #quit();
 
 
-for i in range(1):
+for i in range(1000):
     lossModel.fit([x,y],  
                   batch_size=batchSize, epochs=1, verbose=1
                 ,callbacks=[history], shuffle=False)

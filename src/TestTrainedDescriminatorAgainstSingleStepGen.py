@@ -27,7 +27,7 @@ K.set_session(session)
 tsList= loadCsv('../data/GBPUSD.csv');
 
 
-descrWindowSize = 100;
+descrWindowSize = 1000;
 generatorWindowSize = 20
 batchSize = 128;
 optimizer = Adam()
