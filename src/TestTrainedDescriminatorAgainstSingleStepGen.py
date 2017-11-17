@@ -14,12 +14,11 @@ from keras.optimizers import Adam
 import keras;
 import matplotlib.pyplot as plt
 import math;
-
+import SingleStepGenerator
 import tensorflow as tf;
 from keras import backend as K
 from SingleStepRandomGenerator import SingleStepTSGenerator
-
-
+from TrainingSet import SingleStepTrainingSetGenerator
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
@@ -28,107 +27,33 @@ K.set_session(session)
 tsList= loadCsv('../data/GBPUSD.csv');
 
 
-descrWindowSize = 8000;
-generatorWindowSize = 10
+descrWindowSize = 100;
+generatorWindowSize = 20
 batchSize = 128;
+optimizer = Adam()
+
+trainingSet = SingleStepTrainingSetGenerator(windowSize = generatorWindowSize, 
+                                   numRealSamples = descrWindowSize, tsList = tsList);
+
+singleStepGenModelFactory = SingleStepGenerator.GeneratorFactory(shp=(generatorWindowSize,1), dopt = optimizer)
+genModel, g_input = singleStepGenModelFactory.createLSTM(batch_size=batchSize, look_back = generatorWindowSize);
+o_input = Input(shape=[1]);
+lossModel = singleStepGenModelFactory.createLossModel(overallInput=g_input, generatorOutput=genModel(g_input), observed=o_input);
 
 
-singleStepGenModel =keras.models.load_model('./singlestepgenerator.model', custom_objects={"NormalPDFLogLikelyhoodLayer": NormalPDFLogLikelyhoodLayer});
-m = singleStepGenModel.get_layer("Generator_model");
-m.summary();
+
 #m = singleStepGenModel
 
+lossModel.load_weights('singlestepgenerator.model')
+tsg = SingleStepTSGenerator(genModel, generatorWindowSize, descrWindowSize, np.array([x[1] for x in tsList]), batchSize);
 
-tsg = SingleStepTSGenerator(m, generatorWindowSize, descrWindowSize, np.array([x[1] for x in tsList]), batchSize);
 
-plt.plot(tsg.generate());
-plt.figure();
+plt.figure('Random data');
+plt.plot(trainingSet.denormalise(tsg.generate()));
+plt.figure('Real data');
 #plt.hold(True);
 
-plt.plot(tsg.inputData);
+plt.plot(trainingSet.denormalise(tsg.inputData));
 
 plt.show();
 
-
-
-quit();
-
-
-trainedNet = keras.models.load_model('./model.keras');
-
-
-numRealSamples = len(tsList)-descrWindowSize;
-numFakeSamples = numRealSamples
-
-print("Num real samples")
-print(numRealSamples);
-print("Num Fake samples")
-print(numFakeSamples);
-
-generator = TrainingSetGenerator(windowSize = descrWindowSize, 
-                                   numRealSamples = numRealSamples,
-                                   numFakeSamples = numFakeSamples);
-dataSetSize = numRealSamples+numFakeSamples;                                    
-x, y, generatorsUsed = generator.create(tsList);
-                                   
-yPrime = trainedNet.predict(x);
-
-
-errorsPerGenerator = dict();
-correct = 0;
-for i in range(0, dataSetSize ):
-    predictedReal = False;
-    isReal = False;
-    if yPrime[i][0]>yPrime[i][1]:
-        predictedReal = True;
-    
-    if y[i][0]>y[i][1]:
-        isReal = True;
-    
-    if isReal == predictedReal:
-        correct = correct +1;
-    else:
-        print("-----")
-        print("Did not predict correctly at index " + str(i))
-        print("Generator used = ")
-        print(generatorsUsed[i]);
-                
-        
-        print("Predicted Y:")
-        print(yPrime[i]);
-        print("Actual Y:")
-        print(y[i]);
-        print("Is real? " + str(isReal))
-        
-        
-        if generatorsUsed[i]!=None:
-            name = type(generatorsUsed[i]).__name__;
-            if not name in errorsPerGenerator.keys():
-                errorsPerGenerator[name]=0;
-            errorsPerGenerator[name]=errorsPerGenerator[name]+1;
-        
-        #plt.figure("Failed to predict");
-        #plt.plot(x[i]);
-        #plt.show();
-
-a = float(correct) / float(dataSetSize)
-print("Prediction accuracy = " + str(a));
-print("Failed to catch " + str(dataSetSize-correct) +" timeseries")
-
-print(errorsPerGenerator);
-
-with open("results.csv","w") as file: 
-
-    for strideX in range(0, dataSetSize ):
-        file.write(str(yPrime[strideX][0]))
-        file.write(',');
-        file.write(str(yPrime[strideX][1]))
-        file.write(',');
-        file.write(str(y[strideX][0]))
-        file.write(',');
-        file.write(str(y[strideX][1]))
-        file.write(',');
-        if generatorsUsed[strideX]!=None:
-            file.write(type(generatorsUsed[strideX]).__name__)
-        
-        file.write('\n');

@@ -34,5 +34,5 @@ class LossHistory(keras.callbacks.Callback):
         
         if (l<self.minLoss):
             print("Saving new best model");
-            self.model.save(self.filename)
+            self.model.save_weights(self.filename)
             self.minLoss = l;

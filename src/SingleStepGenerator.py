@@ -30,7 +30,7 @@ class NormalPDFLogLikelyhoodLayer(Layer):
 
     def call(self, inputs):
         mu = inputs[0];
-        sigmaSquared = inputs[1];
+        sigmaSquared = inputs[1]+1e-5;
         observation = inputs[2];
    
         
@@ -48,7 +48,7 @@ class NormalPDFLogLikelyhoodLayer(Layer):
         self.add_loss(loss, inputs=inputs)
         
         # Output is not relevant
-        return inputs[0:1];
+        return inputs;
 
 class GeneratorFactory:
     def __init__(self, dopt, shp=[25], dropout_rate = 0.25):
