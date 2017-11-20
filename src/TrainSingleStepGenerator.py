@@ -27,7 +27,7 @@ session = tf.Session(config=config)
 K.set_session(session)
 
 
-windowSize = 20;
+windowSize = 10;
 batchSize=128
 optimizer = Adam()
 factory = SingleStepGenerator.GeneratorFactory(shp=(windowSize,1), dopt = optimizer)

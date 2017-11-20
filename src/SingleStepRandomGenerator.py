@@ -15,7 +15,7 @@ class SingleStepTSGenerator:
         
         self.windowSize = windowSize;
         self.outWindowSize = outWindowSize;
-        self.inputData = normaliser.normalise(inputData);
+        self.inputData = np.diff(normaliser.normalise(inputData));
         self.batch_size = batch_size;
         
         
@@ -35,13 +35,15 @@ class SingleStepTSGenerator:
         
         gb = gb.reshape((self.batch_size,self.windowSize,1))
         
+        var_eps = 0;
+        
         outBuffer = np.zeros((self.outWindowSize));
         self.model.reset_states();
         print("Generate");
         for i in range(0, self.outWindowSize):
             #print(gb.shape)
             p = self.model.predict(gb, batch_size=self.batch_size);
-            rs = p[0][self.windowSize-1] + np.random.normal(scale = math.sqrt(p[1][self.windowSize-1])) ;
+            rs = p[0][self.windowSize-1] + np.random.normal(scale = math.sqrt(p[1][self.windowSize-1] + var_eps)) ;
             outBuffer[i] = rs;
             
             
@@ -54,7 +56,7 @@ class SingleStepTSGenerator:
                 
             gb[self.batch_size-1][self.windowSize-1][0] = rs;
 #             q = np.reshape(gb[self.batch_size-1], (self.windowSize));
-#             print(q.shape);
+#             plt.figure('');
 #             plt.plot(q);
 #             plt.show();
         return outBuffer;

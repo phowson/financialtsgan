@@ -19,6 +19,7 @@ def make_trainable(net, val):
         l.trainable = val
 
 
+
 class LossHistory(keras.callbacks.Callback):
     
     def __init__(self, model, filename = 'model.keras'):

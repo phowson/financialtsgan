@@ -52,16 +52,18 @@ class SingleStepTrainingSetGenerator:
         self.windowSize = windowSize;
         
         origTs = np.array([x for _,x in tsList]);
+        self.zeroPoint = origTs[0];
         logTs = [ math.log(x) for x in origTs];
         self.normaliser = RangeNormaliser(logTs);        
         
-        self.ts = self.normaliser.normalise(logTs);
+        self.ts = np.diff(self.normaliser.normalise(logTs));
     
     
     def denormalise(self, ts =None):
         if ts is None:
             ts = self.ts;
-        return [math.exp(x) for x in self.normaliser.denormalise(ts)]
+        a = np.array([math.exp(x) for x in self.normaliser.denormalise(np.cumsum(ts))]);
+        return a+self.zeroPoint;
     
     def create(self):
         

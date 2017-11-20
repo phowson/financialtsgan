@@ -30,15 +30,15 @@ class NormalPDFLogLikelyhoodLayer(Layer):
 
     def call(self, inputs):
         mu = inputs[0];
-        sigmaSquared = inputs[1]+1e-5;
+        sigmaSquared = inputs[1];
         observation = inputs[2];
    
         
+        #self.scalingFactor  *
+        pdfValue =  K.exp(-K.square(observation - mu) / (2 * sigmaSquared) ) / K.sqrt(sigmaSquared)
         
-        pdfValue = self.scalingFactor  * K.exp(-K.square(observation - mu) / (2 * sigmaSquared) ) / K.sqrt(sigmaSquared)
         
-        
-        logLikelyhood = K.log(pdfValue)
+        logLikelyhood = K.log(1+pdfValue)
         # Having some issues with stability
         loss = K.exp(-K.mean(logLikelyhood));
         
